@@ -2,6 +2,8 @@
 
 A lightweight, modern, and production-structured **Flask CRUD Web Application and REST API**. Instead of a traditional database, this application utilizes a thread-safe Python dictionary (**Hashmap**) in memory for rapid data operations with $O(1)$ lookups, insertions, updates, and deletions.
 
+![FlashMap Dashboard Preview](assets/preview.png)
+
 ---
 
 ## 🌟 Key Features
