@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashMap | In-Memory Engine</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar / Header Banner -->
+        <header class="navbar">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-bolt-lightning"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>Flash<span>Map</span></h1>
+                    <span class="badge-hashmap"><i class="fa-solid fa-microchip"></i> Hashmap Memory DB</span>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <button id="btn-seed" class="btn btn-outline" title="Reset sample data in hashmap">
+                    <i class="fa-solid fa-rotate"></i> Reset Sample Data
+                </button>
+                <button id="btn-open-create" class="btn btn-primary">
+                    <i class="fa-solid fa-plus"></i> New Task / Item
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Bar -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon total"><i class="fa-solid fa-list-check"></i></div>
+                <div class="stat-info">
+                    <span class="stat-label">Total Items</span>
+                    <span id="stat-total" class="stat-value">0</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon pending"><i class="fa-regular fa-clock"></i></div>
+                <div class="stat-info">
+                    <span class="stat-label">Pending</span>
+                    <span id="stat-pending" class="stat-value">0</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon progress"><i class="fa-solid fa-spinner"></i></div>
+                <div class="stat-info">
+                    <span class="stat-label">In Progress</span>
+                    <span id="stat-progress" class="stat-value">0</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon completed"><i class="fa-regular fa-circle-check"></i></div>
+                <div class="stat-info">
+                    <span class="stat-label">Completed</span>
+                    <span id="stat-completed" class="stat-value">0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Control Bar (Search & Filter) -->
+        <section class="controls-card">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="search-input" placeholder="Search by title, description or category...">
+                <button id="clear-search" class="btn-clear-search hidden"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="filter-group">
+                <div class="filter-item">
+                    <label for="filter-status"><i class="fa-solid fa-filter"></i> Status</label>
+                    <select id="filter-status">
+                        <option value="All">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+
+                <div class="filter-item">
+                    <label for="filter-priority"><i class="fa-solid fa-layer-group"></i> Priority</label>
+                    <select id="filter-priority">
+                        <option value="All">All Priorities</option>
+                        <option value="Urgent">Urgent</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                </div>
+
+                <div class="filter-item">
+                    <label for="filter-category"><i class="fa-solid fa-folder"></i> Category</label>
+                    <select id="filter-category">
+                        <option value="All">All Categories</option>
+                        <option value="Design">Design</option>
+                        <option value="Backend">Backend</option>
+                        <option value="Frontend">Frontend</option>
+                        <option value="Documentation">Documentation</option>
+                        <option value="QA">QA</option>
+                        <option value="General">General</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Items Content -->
+        <main class="content-area">
+            <div id="items-container" class="items-grid">
+                <!-- Dynamically populated cards -->
+            </div>
+
+            <div id="empty-state" class="empty-state hidden">
+                <div class="empty-icon"><i class="fa-solid fa-inbox"></i></div>
+                <h3>No Items Found</h3>
+                <p>No items match your search or filter parameters in the Hashmap repository.</p>
+                <button id="btn-empty-create" class="btn btn-primary btn-sm">
+                    <i class="fa-solid fa-plus"></i> Create First Item
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Form (Create / Edit) -->
+    <div id="item-modal" class="modal-backdrop hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2 id="modal-title"><i class="fa-solid fa-pen-to-square"></i> Create Item</h2>
+                <button id="btn-close-modal" class="btn-icon"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form id="item-form">
+                <input type="hidden" id="form-item-id">
+                
+                <div class="form-group">
+                    <label for="form-title">Title <span class="required">*</span></label>
+                    <input type="text" id="form-title" placeholder="e.g., Optimize Database Query Performance" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="form-description">Description</label>
+                    <textarea id="form-description" rows="3" placeholder="Provide details or context for this item..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="form-category">Category</label>
+                        <select id="form-category">
+                            <option value="General">General</option>
+                            <option value="Backend">Backend</option>
+                            <option value="Frontend">Frontend</option>
+                            <option value="Design">Design</option>
+                            <option value="Documentation">Documentation</option>
+                            <option value="QA">QA</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="form-priority">Priority</label>
+                        <select id="form-priority">
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                            <option value="Urgent">Urgent</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="form-status">Status</label>
+                        <select id="form-status">
+                            <option value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="btn-cancel-modal" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" id="btn-save-item" class="btn btn-primary">
+                        <i class="fa-solid fa-check"></i> Save Item
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
